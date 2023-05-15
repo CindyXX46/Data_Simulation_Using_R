@@ -1,0 +1,516 @@
+---
+title: "PALS0043 Course Work, Candidate YWKF8"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "", message = F, warning = F)
+# Libraries
+library(lme4)
+library(lmerTest)
+library(tidyverse)
+library(faux)
+library(psych)
+library(sjPlot)
+library(broom.mixed)
+library(patchwork)
+library(pwr)
+library(kableExtra)
+set.seed(2468)
+```
+
+## 1. Journal article
+
+The paper that I will base my experiment on is: 
+Košak-Babuder M, Kormos J, Ratajczak M, Pižorn K. The effect of read-aloud assistance on the text comprehension of dyslexic and non-dyslexic English language learners. Language Testing. 2019 Jan, 36(1), 51-75. https://doi.org/10.1177/0265532218756946
+
+I confirm this is a peer reviewed article about a psychology topic.
+
+I confirm I have attached an annotated pdf to this submission.
+
+## 2. Background information
+
+Dyslexia, as one type of learning disorder (LD), is characterized by individuals having word-level reading difficulties, including slow and inaccurate word-level decoding. Therefore, dyslexic individuals tend to experience difficulties in understanding reading texts. In the second language (L2) testing contexts researchers observed that there is an increasing number of individuals with dyslexia. It is essential to make sure that neither the test design nor test implementation procedures disadvantage dyslexic students. In order to demonstrate the full range of their abilities, dyslexic test-takers should be entitled to request special arrangements.
+
+A frequent type of support offered to students with dyslexia is read-aloud assistance. When a text is read as well as listened to, the text is processed in both visual and auditory working memory. According to dual-modality theory, this assists in retaining information and building connections. This support is frequently used in non-test conditions by teachers and parents to improve the comprehension of written texts. Yet, it is less frequent in standardised assessment contexts because read-aloud assistance is believed to have effects on the assessment structure. Moreover, the usefulness of read-aloud assistance remains controversial, especially in the L2 field. Previous studies compare the text performance of L2 learners under listening-only and read-aloud assistance conditions. Some studies found that students scored higher when they were given read-aloud assistance, but the effect size was small. Other studies found no significant effect of the presentation mode. The participants, however, expressed a preference for read-aloud assistance and felt that being able to read the text while listening made the task easier. Other studies also tested the mode effect of reading-only and listening-only conditions, but there is no study tested all three modes in one experimental setting.
+
+Thus, Košak-Babuder et al. (2019) conduct a novel experimental study to examine the effect of test mode, dyslexic status, and text difficulty on test performance in standardised assessment contexts. 
+
+
+## 3. Research Question / Hypotheses
+
+**The question I have chosen to simulate is**: "How modes of presentation, dyslexia status, and text difficulty affect the text comprehension of young Slovenian learners of English" (Košak-Babuder et al., 2019, p.57)
+
+**Simplifications I made to this question are**: I did not make changes: How modes of presentation, dyslexia status, and text difficulty affect the text comprehension of young Slovenian learners of English.
+
+**Hypotheses relating to this question are**:
+
+H1: Listening mode and read-aloud assistance mode negatively affect the accuracy of text comprehension (hypothesis one is novel and lacks empirical support, thus can be consider as exploratory)
+
+H2: Having dyslexia negatively affects the accuracy of text comprehension 
+
+H3: Easy text positively affects the accuracy of text comprehension
+
+## 4. Variables
+
+### The dependent variable
+
+**Name**: accuracy
+
+**Type**: binary
+
+**Values it can take**: 0 (incorrect) and 1 (correct)
+
+**Descriptive statistics**: Students' answers are either correct or incorrect. Student's final accuracy of doing the test is calculated by the number of correct answers divided by total number of questions. The grounded accuracy log odds (intercept) is 1.5 (see Table 5, p. 63). Converting to probability is 0.8.
+
+### The independent variable (1)
+
+**Name**: dyslexia status
+
+**Type**: binary
+
+**Values it can take**: 0 (non-dyslexic) and 1 (dyslexic). Non-dyslexic is the reference level for dyslexia status.
+
+**Descriptive statistics**: according to the participants section (p.57), there are 280 students in total, 47 students are dyslexic and 233 students have no identified dyslexia. Dyslexic percentage is 0.168. 
+
+### The independent variable (2)
+
+**Name**: mode
+
+**Type**: categorical/nominal (3 levels)
+
+**Values it can take**: reading-only (reference level), listening-only, and read-aloud assistance (RAS)
+
+**Descriptive statistics**: each student will finish all 3 modes, but the reading mode will be done twice (because there are four texts needed to be done). Students will answer to two texts in reading mode, one text in listening mode, and one text with read-aloud assistance.
+
+### The independent variable (3)
+
+**Name**: text difficulty
+
+**Type**: categorical/nominal (2 levels). It looks like a binary variable in this case, but it is not yes or no questions, and more levels can be added. Two-level categorical is more reasonable.
+
+**Values it can take**: difficult (reference level) and easy
+
+**Descriptive statistics**: Each student will finish 4 texts. Text A and C are difficult texts. Text B and D are easy texts. According to table 4 (Košak-Babuder et al., 2019, p.61), the mean accuracy of reading difficult text is 0.66 (SD = 0.47), reading easy text is 0.74 (SD = 0.44). Mean accuracy of listening to difficult text is 0.59 (SD = 0.49), listening to easy text is 0.74 (SD = 0.44). The accuracy of reading difficult text with read-aloud assistance is 0.69 (SD = 0.46), reading easy text with read-aloud assistance is 0.81 (SD = 0.39).
+
+### Random effects (if applicable)
+
+**Structure**: The paper included random intercept and slope of participants, random intercept and slope of each question, and the random intercept of texts (see Košak-Babuder et al., 2019, p.62). Present work simplified the model, only the random intercept of students (participants) and the random intercept of text were included.
+
+**Descriptive statistics**: The SD of random intercept of student is 1.85. SD of random intercept of text is 0.51.
+
+## 5. Study Design
+
+**Study design**: this is an experimental study with a between factor of dyslexia status, and within factors of mode and text difficulty. In the original study, each student will finish 6 questions for each text. There are 4 texts in total, so each student will contribute 24 answers. There should be 280x4x6 = 6720 observations. To reduce the number of observations (too many of them will result in a long time of simulation), I cut down the number of question under each text. Each student will only contribute 1 question for each text. Thus, the total observations will be 280x4 = 1120.
+
+There is also a counterbalance design in the study (see table 2, Košak-Babuder et al., 2019, p.59). Students will be randomly allocated to one of the eight groups (there is a mistake in the table and it shows 9 groups), and every 2 groups will have a different text-mode structure. Text-mode structure is that each text will be only presented in one mode (e.g., in group 1, text A will be presented in reading-only mode, text C in listening-only mode, etc.), but this structure varied from groups. Group 1 & 2 have the same text-mode structure but are counterbalanced. Same as group 3 & 4, group 5 & 6, and group 7 & 8. 
+
+**Model formula**: 
+
+The one the paper applied was: 
+
+glmer(accuracy ~ dyslexia * mode * text_diff + (text_diff + mode + 1|students) + (mode + 1|questions) + (1|text), family = "binomial")
+
+Model that I applied:
+
+glmer(accuracy ~ dyslexia + mode + text_diff + (1|students) + (1|text), family = "binomial")
+
+I simplified the model by excluding the interaction effect because in the paper, most interactions are non-significant. However, I will compare the two models with and without the interaction so that it is easier to compare my simulated model with the one in the paper. I will apply the no-interaction model in all simulation.
+
+## 6. Simulation code for 1 dataset
+
+```{r}
+# Get numbers from the paper
+nstudents <- 280  # There are 280 student participants
+prop_dyslex <- 47/280  # 47 out of 280 participants have dyslexia (0.168)
+
+# Fix effect
+b0 <- 1.5  # intercept
+b1 <- -1.81  # dyslexia coefficient
+b2 <- -0.59  # mode coefficient (listening)
+b3 <- -0.11  # mode coefficient (reading-aloud assistance; RAS)
+b4 <- 0.69  # text difficulty coefficient
+
+# Random effect
+tau_0 <- 1.85  # participants intercept SD
+omega_0 <- 0.51  # text intercept SD
+
+# Making the data frame
+# Students table
+Pdata <- tibble(students = 1:nstudents,   # number of students
+                u0p = rnorm(n = nstudents, 
+                            mean = 0, 
+                            sd = tau_0),  # students random effect
+                dyslexia = rbinom(n = nstudents, 
+                                  size = 1, 
+                                  prob = prop_dyslex))  # dyslexia
+# Texts table
+Tdata <- tibble(text = c("A", "B", "C", "D"),  # Four texts
+                u0t = rnorm(n = 4,
+                            mean = 0, 
+                            sd = omega_0))  # text random effect
+
+simdata <- crossing(students = 1:nstudents, 
+                    text = c("A", "B", "C", "D"))
+
+simdata <- simdata %>% inner_join(Pdata, by="students") %>% 
+  inner_join(Tdata, by = "text") %>%
+  mutate(text_diff = rep(c("difficult", "easy"), nstudents*2)) %>%   # adding difficulty
+  # adding modes according to table 2
+  mutate(mode = c(rep(c("1reading", "1reading", "listening", "RAS"), 88),  # group 1&2
+                  rep(c("1reading", "1reading", "RAS", "listening"), 88),  # group 3&4
+                  rep(c("listening", "RAS", "1reading", "1reading"), 52),  # group 5&6
+                  rep(c("RAS", "listening", "1reading", "1reading"), 52)))  # group 7&8
+# Adding number 1 in front of 'reading' because we want to make it the reference level
+
+simdata <- simdata %>% mutate(b0 = b0,
+                              b1 = b1,
+                              mode_effect = if_else(mode == "listening", b2, if_else(mode == "RAS", b3, 0)),  # this means if the mode is listening, the effect is b2 (-0.59), if the mode is RAS, the effect is b3 (-0.11). Otherwise (reading mode) has no effect.
+                              diff_effect = if_else(text_diff == "easy", b4, 0),  # if the text difficulty is easy, the effect is b4 (0.69).
+                              accuracy_logodds = b0 + u0p + u0t + b1*dyslexia + mode_effect + diff_effect)
+
+# Convert log odds into probability and add them into the dataset
+simdata <- simdata %>%
+  mutate(probability = logistic(accuracy_logodds)) %>%
+  mutate(accuracy = rbinom(n = nrow(simdata),
+                        size = 1,
+                        prob = probability))
+```
+
+## 7. Code to check simulation has worked
+
+### Descriptives
+```{r}
+# Allocation check
+# There should be 280 participants, each of them will finish 4 texts
+simdata %>% count(students)
+# The proportion of dyslexia participants should be around 0.168
+simdata %>% count(dyslexia) %>% mutate(n = n/4, prop = n/sum(n)) %>% 
+  kable(align = "l") %>% kable_styling()
+# Each student finished 4 texts so there should be 280 for each text. Text A & C are difficult text while text B & D are easy text.
+simdata %>% count(text, text_diff) %>% 
+  kable(align = "l") %>% kable_styling()
+# Reading conditions should be twice as much as the other two conditions
+simdata %>% count(mode) %>% 
+  kable(align = "l") %>% kable_styling()
+
+# Overall accuracy between two dyslexia groups
+simdata %>% group_by(dyslexia) %>% 
+  summarise(mean_acc = mean(accuracy) %>% round(2), 
+            sd_acc = sd(accuracy) %>% round(2)) %>% 
+  kable(align = "l") %>% kable_styling()
+# Accuracy across mode and text difficulty (see the third column of Table 4 from Košak-Babuder et al., 2019, p.61)
+simdata %>% group_by(mode, text_diff) %>% 
+  summarise(mean_acc = mean(accuracy) %>% round(2), 
+            sd_acc = sd(accuracy) %>% round(2)) %>% 
+  kable(align = "l") %>% kable_styling()
+
+# Making a summary table to create figures (see Table 4 from Košak-Babuder et al., 2019, p.61)
+table_summary <- simdata %>% 
+  group_by(dyslexia, mode, text_diff) %>% 
+  summarise(n = n(),
+            prop_accuracy = mean(accuracy) %>% round(2), 
+            sd_accuracy = sd(accuracy) %>% round(2)) %>%
+  mutate(dyslexia = recode(dyslexia, "0" = "Non-dyslexic", "1" = "Dyslexic"),
+         se_accuracy = (sd_accuracy/sqrt(n)) %>% round(3))
+kable(table_summary) %>% kable_styling()
+
+# Replicating figure 1 (Košak-Babuder et al., 2019, p.65)
+p1table <- table_summary %>% filter(mode == "1reading", text_diff == "difficult")
+p1 <- ggplot(p1table, aes(x = dyslexia, y = prop_accuracy, group = dyslexia)) + 
+  geom_boxplot(width = 0.08) + 
+  geom_errorbar(aes(ymin = prop_accuracy - se_accuracy,
+                    ymax = prop_accuracy + se_accuracy), 
+                width = 0.5) + 
+  labs(x = "Status", y= "Accuracy", title= "Reading & Difficult") +
+  ylim(0, 1) +
+  theme_bw()
+
+p2table <- table_summary %>% filter(mode == "listening", text_diff == "difficult")
+p2 <- ggplot(p2table, aes(x = dyslexia, y = prop_accuracy, group = dyslexia)) + 
+  geom_boxplot(width = 0.08) + 
+  geom_errorbar(aes(ymin = prop_accuracy - se_accuracy,
+                    ymax = prop_accuracy + se_accuracy), 
+                width = 0.5) + 
+  labs(x = "Status", y= "Accuracy", title= "Listening & Difficult") +
+  ylim(0, 1) +
+  theme_bw()
+
+p3table <- table_summary %>% filter(mode == "RAS", text_diff == "difficult")
+p3 <- ggplot(p3table, aes(x = dyslexia, y = prop_accuracy, group = dyslexia)) + 
+  geom_boxplot(width = 0.08) + 
+  geom_errorbar(aes(ymin = prop_accuracy - se_accuracy,
+                    ymax = prop_accuracy + se_accuracy), 
+                width = 0.5) + 
+  labs(x = "Status", y= "Accuracy", title= "RAS & Difficult") +
+  ylim(0, 1) +
+  theme_bw()
+
+p4table <- table_summary %>% filter(mode == "1reading", text_diff == "easy")
+p4 <- ggplot(p4table, aes(x = dyslexia, y = prop_accuracy, group = dyslexia)) + 
+  geom_boxplot(width = 0.08) + 
+  geom_errorbar(aes(ymin = prop_accuracy - se_accuracy,
+                    ymax = prop_accuracy + se_accuracy), 
+                width = 0.5) + 
+  labs(x = "Status", y= "Accuracy", title= "Reading & Easy") +
+  ylim(0, 1) +
+  theme_bw()
+
+p5table <- table_summary %>% filter(mode == "listening", text_diff == "easy")
+p5 <- ggplot(p5table, aes(x = dyslexia, y = prop_accuracy, group = dyslexia)) + 
+  geom_boxplot(width = 0.08) + 
+  geom_errorbar(aes(ymin = prop_accuracy - se_accuracy,
+                    ymax = prop_accuracy + se_accuracy), 
+                width = 0.5) + 
+  labs(x = "Status", y= "Accuracy", title= "Listening & Easy") +
+  ylim(0, 1) +
+  theme_bw()
+
+p6table <- table_summary %>% filter(mode == "RAS", text_diff == "easy")
+p6 <- ggplot(p6table, aes(x = dyslexia, y = prop_accuracy, group = dyslexia)) + 
+  geom_boxplot(width = 0.08) + 
+  geom_errorbar(aes(ymin = prop_accuracy - se_accuracy,
+                    ymax = prop_accuracy + se_accuracy), 
+                width = 0.5) + 
+  labs(x = "Status", y= "Accuracy", title= "RAS & Easy") +
+  ylim(0, 1) +
+  theme_bw()
+
+(p1 + p2+ p3 + p4 + p5 + p6) +
+  plot_layout(ncol = 3)
+```
+
+### Model outputs
+```{r}
+# No interaction model
+mod_sim <- glmer(accuracy ~ dyslexia + mode + text_diff + (1|students) + (1|text), 
+                 dat = simdata, 
+                 family = "binomial",
+                 control = glmerControl(optimizer="bobyqa"))  # adding an optimiser because otherwise the model cannot converge.
+
+# With interaction model
+mod_sim2 <- glmer(accuracy ~ dyslexia * mode * text_diff + (1|students) + (1|text), 
+                 dat = simdata, 
+                 family = "binomial",
+                 control = glmerControl(optimizer="bobyqa"))
+
+# Model comparison
+tab_model(mod_sim, mod_sim2, 
+          transform = NULL,  # Keep log odds
+          show.ci = F,
+          show.se = T, string.se = "SE",  # show SEs
+          show.aic = T)  # show AIC
+
+# By comparing the data in the simulated model to table 5 in the original paper, they are quite similar, especially when checking the p values of the predictors.
+```
+
+## 8. Simulation code for power analysis
+
+**Any differences to original experiment**: no power analysis in the study, I will use the default alpha level (alpha = 0.05). Since the effects of listening mode and dyslexia are both significant in the original paper and the simulation, I will focus on these two variables.
+
+**Alpha level**: 0.05
+
+**Effect of interest**: listening mode effect and dyslexic effect
+
+```{r}
+pwr_analysis <- function() {
+  nstudents <- 280  # there are 280 student participants
+prop_dyslex <- 47/280  # 47 out of 280 participants have dyslexia (0.168)
+
+# Fix effect
+b0 <- 1.5  # intercept
+b1 <- -1.81  # dyslexia coefficient
+b2 <- -0.59  # mode coefficient (listening)
+b3 <- -0.11  # mode coefficient (reading-aloud assistance; RAS)
+b4 <- 0.69  # text difficulty coefficient
+
+# Random effect
+tau_0 <- 1.85  # participants intercept SD
+omega_0 <- 0.51  # text intercept SD
+
+# Making the data frame
+Pdata <- tibble(students = 1:nstudents, # number of students
+                u0p = rnorm(n = nstudents, 
+                            mean = 0, 
+                            sd = tau_0),  # students random effect
+                dyslexia = rbinom(n = nstudents, 
+                                  size = 1, 
+                                  prob = prop_dyslex))  # dyslexia
+
+Tdata <- tibble(text = c("A", "B", "C", "D"),  # Four texts
+                u0t = rnorm(n = 4,
+                            mean = 0, 
+                            sd = omega_0))  # text random effect
+
+simdata <- crossing(students = 1:nstudents, 
+                    text = c("A", "B", "C", "D"))
+
+simdata <- simdata %>% inner_join(Pdata, by="students") %>% inner_join(Tdata, by = "text") %>%
+  mutate(text_diff = rep(c("difficult", "easy"), nstudents*2)) %>% 
+  mutate(mode = c(rep(c("1reading", "1reading", "listening", "RAS"), 88), 
+                  rep(c("1reading", "1reading", "RAS", "listening"), 88),
+                  rep(c("listening", "RAS", "1reading", "1reading"), 52),
+                  rep(c("RAS", "listening", "1reading", "1reading"), 52)))
+
+simdata <- simdata %>% mutate(b0 = b0,
+                              b1 = b1,
+                              mode_effect = if_else(mode == "listening", b2, if_else(mode == "RAS", b3, 0)),
+                              diff_effect = if_else(text_diff == "easy", b4, 0),
+                              accuracy_logodds = b0 + u0p + u0t + b1*dyslexia + mode_effect + diff_effect)
+
+# Convert log odds into probability and add them into the data
+simdata <- simdata %>%
+  mutate(probability = logistic(accuracy_logodds)) %>%
+  mutate(accuracy = rbinom(n = nrow(simdata),
+                        size = 1,
+                        prob = probability))
+
+mod_sim <- glmer(accuracy ~ dyslexia + mode + text_diff + (1|students) + (1|text), 
+                 dat = simdata, 
+                 family = "binomial")
+tidy(mod_sim, effects = 'fixed')
+}
+```
+
+```{r eval=F}
+sim <- map_df(1:100, ~pwr_analysis())
+sim_pwr <- sim %>% mutate(sig = p.value < .05) %>%
+  filter(term == "modelistening")
+sim_pwr %>% pull(sig) %>% mean()  # 84%
+
+sim <- map_df(1:100, ~pwr_analysis())
+sim_pwr <- sim %>% mutate(sig = p.value < .05) %>%
+  filter(term == "dyslexia")
+sim_pwr %>% pull(sig) %>% mean()  # 100%
+
+# The dyslexia variable has a great statistical power could because of its very large effect size (the absolute value is greater than 1, almost 2).
+```
+
+Using this simulated dataset, the power to detect a significant (p < .05) listening effect of log odds -0.59 was 84%. The power to detect a significant dyslexic effect of log odds -1.81 was 100%.
+
+## 9. Sensitivity analysis
+
+**Description of parameter(s) that were changed for this part**: The variable I chose is dyslexia status. I decided to run this for a range of n from 10 to 300 in increments of 10, and for 3 assumptions about the size of b1: -1, -1.25 and -1.5. The effect size in the paper is to large, thus, I chose 3 smaller effect sizes.
+
+```{r}
+# Recode the function
+sens_analysis <- function(n, b1) {
+  nstudents <- 280  # there are student 280 participants
+prop_dyslex <- 47/280  # 47 out of 280 participants have dyslexia (0.168)
+
+# Fix effect
+b0 <- 1.5  # intercept
+b1 <- b1  # dyslexia coefficient
+b2 <- -0.59  # mode coefficient (listening)
+b3 <- -0.11  # mode coefficient (reading-aloud assistance; RAS)
+b4 <- 0.69  # text difficulty coefficient
+
+# Random effect
+tau_0 <- 1.85  # participants intercept SD
+omega_0 <- 0.51  # text intercept SD
+
+# Making the data frame
+Pdata <- tibble(students = 1:nstudents, # number of students
+                u0p = rnorm(n = nstudents, 
+                            mean = 0, 
+                            sd = tau_0),  # students random effect
+                dyslexia = rbinom(n = nstudents, 
+                                  size = 1, 
+                                  prob = prop_dyslex))  # dyslexia
+
+Tdata <- tibble(text = c("A", "B", "C", "D"),  # Four texts
+                u0t = rnorm(n = 4,
+                            mean = 0, 
+                            sd = omega_0))  # text random effect
+
+simdata <- crossing(students = 1:nstudents, 
+                    text = c("A", "B", "C", "D"))
+
+simdata <- simdata %>% inner_join(Pdata, by="students") %>% inner_join(Tdata, by = "text") %>%
+  mutate(text_diff = rep(c("difficult", "easy"), nstudents*2)) %>% 
+  mutate(mode = c(rep(c("1reading", "1reading", "listening", "RAS"), 88), 
+                  rep(c("1reading", "1reading", "RAS", "listening"), 88),
+                  rep(c("listening", "RAS", "1reading", "1reading"), 52),
+                  rep(c("RAS", "listening", "1reading", "1reading"), 52)))
+
+simdata <- simdata %>% mutate(b0 = b0,
+                              b1 = b1,
+                              mode_effect = if_else(mode == "listening", b2, if_else(mode == "RAS", b3, 0)),
+                              diff_effect = if_else(text_diff == "easy", b4, 0),
+                              accuracy_logodds = b0 + u0p + u0t + b1*dyslexia + mode_effect + diff_effect)
+
+# Convert log odds into probability and add them into the data
+simdata <- simdata %>%
+  mutate(probability = logistic(accuracy_logodds)) %>%
+  mutate(accuracy = rbinom(n = nrow(simdata),
+                        size = 1,
+                        prob = probability))
+
+mod_sim <- glmer(accuracy ~ dyslexia + mode + text_diff + (1|students) + (1|text), 
+                 dat = simdata, 
+                 family = "binomial")
+tidy(mod_sim, effects = 'fixed')
+}
+```
+
+```{r eval=F}
+# Assumptions
+range_n <- seq(10, 300, 10)
+range_b1 <- c(-1, -1.25, -1.5)
+
+# Create a table for samples sizes and effect sizes
+sims <- crossing(n = range_n, 
+                 b1 = range_b1, 
+                 sim = 1:25)  # 1:100 will take forever to run so I use 25
+# Simulate
+sims <- sims %>% mutate(result = map2(n, b1, sens_analysis))
+
+# Select interested factor
+sims_sens <- sims %>% unnest(result) %>% 
+  filter(term == "dyslexia") %>%
+  mutate(sig = p.value < .01)  # I used p value less than 0.01 because if it is less than 0.05 a huge proportion will be significant so it will be hard to tell the sensitivity of certain effect size.
+
+power <- sims_sens %>% group_by(n, b1) %>% 
+  summarise(power = mean(sig)) %>%  # True = 1, False = 0. Using mean allows us to calculate the percentage
+  mutate(b1 = as.factor(b1))
+
+# Save power dataframe
+# write.csv(power, 'power.csv', row.names=F)
+```
+
+**Results of the sensitivity analysis**:
+```{r}
+# Draw power curves
+power <- read.csv("power.csv")
+ggplot(power, 
+       aes(x = n,
+           y = power, 
+           linetype = as.factor(b1))) + 
+  geom_line()  + 
+  theme_bw() +
+  scale_y_continuous(breaks = seq(0, 1, 0.1)) + 
+  scale_x_continuous(breaks = seq(0, 300, 50)) +
+  geom_hline(yintercept = .8, linetype = 'dotdash') + 
+  theme(legend.title = element_blank()) +
+  ggtitle('Power to detect an effect of listening mode for a range of effect sizes')
+# They did not seem to be curves. It seems that when the effect size is -1.5, the power can always exceed 80% regardless of sample size.
+
+# Alternative way
+pwr.t.test(d = -1.5, power = .8 , sig.level = .05)  # Sample size of 9 is required to detect 80% power and a effect size of -1.5
+pwr.t.test(d = -1, power = .8 , sig.level = .05)  # Sample size of 17 is required to detect 80% power and a effect size of -1
+pwr.t.test(d = -0.5, power = .8 , sig.level = .05)  # Sample size of 64 is required to detect 80% power and a effect size of -0.5
+```
+
+## 10. Final reflections
+
+Overall, it was a delightful experience when I successfully generated the dataset.
+
+The first difficulty that I encounter is setting the reference level. The default one was not what I wanted. Then I realised that the reference level may be made by the computer based on alphabetical order. Thus, I needed to put a 1 in front of the reference level to make it the "first" one. I did not need to do this to the difficulty variable because 'd' (difficult) is alphabetically in front of 'e' (easy), so it is automatically the reference level.
+
+Because the mode variable has 3 levels, I did not know how to simulate this variable. I used to think there is only 1 coefficient for each variable. After reading the coursework example 2 I found that there should be one coefficient for each level. More importantly, unlike the continuous variable that we need to time the coefficient with the variable to simulate the effect, when it is a multi-level nominal variable, we can directly recode the effect of that variable by replacing the level with its corresponding coefficient and keeping the reference level as '0'.
+
+Then I started to think about whether I should include the interaction term. I compared the two models with and without the interaction terms and it seems that the one with interaction is slightly better. However, I still stick with the one with no interaction because the interaction model took extensively longer time to analyse and simulate. I am not satisfied with only simulating a non-interactive model this time. I also realised that it is incorrect to fit my non-interactive dataset to an interactive model because the way to calculate dependent variables in an interactive model is different. More terms will be added (according to the paper there should be 7 more), and I will need a coefficient for each interactive term. Hope I will have a chance to simulate more complex data in the future.
+
+I also encountered a model convergence problem. Thus, I used another optimiser for the model. I could not centre the variables because none of them is continuous. I did not wish to use deviate coding because I am afraid the model output may look different from the original paper. However, I do not think changing the optimiser is a good method because I can tell from the model, the conditional R^2 dropped by 0.001 after I did that.
+
+The last problem is the power analysis of dyslexia is very high, and the sensitivity check is always horizontal, not a curve. I tried many sample sizes and effect sizes and even changed variables, but the lines always looked weird. Honestly speaking, the only explanation I can think of is the effect size of dyslexia is too large, or I might make some mistakes that I could not tell. I am not sure if the type of variable will affect the power curve as well. I think I still need to work on this aspect.
