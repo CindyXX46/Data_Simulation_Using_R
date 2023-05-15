@@ -3,7 +3,7 @@ Applied glmer (Generalized Linear Mixed-Effects Models). Included data simulatio
 
 
 ## File Instruction
-You may view the **html** file for the **final report**, as it displays all the procedures and results in the clearest way
+You may **DOWLOAD** and view the **html** file for the **final report**, as it displays all the procedures and results in the clearest way
 
 There is also a rmd file for the final report (the file before knitting into html)
 
